@@ -196,7 +196,7 @@ public class MediaViewer extends JPanel implements ActionListener , MouseListene
 			}
 			albums.getList().setSelectedIndex(0);
 		}
-		
+
 		/**
 		 * Retorna el album seleccionado en la lista
 		 * @return Album seleccionado
@@ -308,14 +308,34 @@ public class MediaViewer extends JPanel implements ActionListener , MouseListene
 	 * LLamado a la hora de remover item de album
 	 */
 	private void removeFromAlbum(){
-		AlbumContentPanel.getInstance().transferItem(null);
+		int selection = JOptionPane.showOptionDialog(
+				null, 
+				"¿Está seguro que quiere quitar el archivo del album?" , 
+				"Quitar archivo", 
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.PLAIN_MESSAGE, 
+				null ,
+				new String[] {"Si" , "No"}, 
+				"No");
+		if(selection == JOptionPane.OK_OPTION)
+			AlbumContentPanel.getInstance().transferItem(null);
 	}
 
 	/**
 	 * Elimina archivo de kubrería
 	 */
 	private void deleteItem(){
-		AlbumContentPanel.getInstance().deleteItem();
+		int selection = JOptionPane.showOptionDialog(
+				null, 
+				"¿Está seguro que quiere eliminar el archivo?" , 
+				"Eliminar archivo", 
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.PLAIN_MESSAGE, 
+				null ,
+				new String[] {"Si" , "No"}, 
+				"No");
+		if(selection == JOptionPane.OK_OPTION)
+			AlbumContentPanel.getInstance().deleteItem();
 	}
 
 	/**

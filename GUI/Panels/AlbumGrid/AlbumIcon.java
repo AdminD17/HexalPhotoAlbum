@@ -12,6 +12,7 @@ import java.io.File;
 
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
@@ -31,7 +32,7 @@ import net.iharder.dnd.FileDrop;
  * @author David Giordana
  *
  */
-public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListener{
+public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListener , ActionListener{
 
 	private static final long serialVersionUID = -2460402491567579008L;
 
@@ -69,7 +70,9 @@ public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListen
 
 	//Menu contextual del icono
 	private JPopupMenu menu;
-	
+	private JMenuItem deleteAlbum;
+	private JMenuItem closeAlbum;
+
 	//COntiene una instancia de la grilla de albumes
 	private AlbumsGrid ag;
 
@@ -221,34 +224,18 @@ public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListen
 	 */
 	private void createMenuPopUp(){
 		menu = new JPopupMenu("Menu contextual");
-				
+
 		//Boton eliminar album con contenido
 		if(name != null){
-			JMenuItem item = new JMenuItem("Eliminar album");
-			item.addActionListener(new ActionListener(){
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					DataController.getInstance().removeAlbum(name);
-					ag.removeAlbum(name);
-				}
-				
-			});
-			menu.add(item);
+			deleteAlbum = new JMenuItem("Eliminar album");
+			deleteAlbum.addActionListener(this);
+			menu.add(deleteAlbum);
 		}
 		//boton quitar album (Elimina el album pero el contenido no se pierde)
 		if(name != null){
-			JMenuItem item = new JMenuItem("Quitar album");
-			item.addActionListener(new ActionListener(){
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					DataController.getInstance().closeAlbum(name);
-					ag.removeAlbum(name);
-				}
-				
-			});
-			menu.add(item);
+			closeAlbum = new JMenuItem("Quitar album");
+			closeAlbum.addActionListener(this);
+			menu.add(closeAlbum);
 		}
 	}
 
@@ -285,6 +272,40 @@ public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListen
 	@Override
 	public void filesDropped(File[] arg0) {
 		ImportWorker.getWorker(arg0, name).start();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource().equals(deleteAlbum)){
+			int selection = JOptionPane.showOptionDialog(
+					null, 
+					"¿Está seguro que quiere eliminar el album?" , 
+					"Eliminar album", 
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.PLAIN_MESSAGE, 
+					null ,
+					new String[] {"Si" , "No"}, 
+					"No");
+			if(selection == JOptionPane.OK_OPTION){
+				DataController.getInstance().removeAlbum(name);
+				ag.removeAlbum(name);
+			}
+		}
+		if(e.getSource().equals(closeAlbum)){
+			int selection = JOptionPane.showOptionDialog(
+					null, 
+					"¿Está seguro que quiere cerrar el album?" , 
+					"Cerrar album", 
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.PLAIN_MESSAGE, 
+					null ,
+					new String[] {"Si" , "No"}, 
+					"No");
+			if(selection == JOptionPane.OK_OPTION){
+				DataController.getInstance().closeAlbum(name);
+				ag.removeAlbum(name);
+			}
+		}
 	}
 
 }
