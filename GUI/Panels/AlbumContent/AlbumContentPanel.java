@@ -18,7 +18,7 @@ import HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaPanels.AddPanel;
 
 /**
  * Panel para mostrar el contenido de un album
- * 
+ *
  * @author David Giordana
  *
  */
@@ -37,7 +37,7 @@ public class AlbumContentPanel extends JPanel implements ActionListener{
 
 	//Panel para agregar items a la lista
 	private AddPanel addPanel;
-	
+
 	//Boton mostrar / ocultar panel de transferencias
 	private JButton hide;
 
@@ -89,13 +89,13 @@ public class AlbumContentPanel extends JPanel implements ActionListener{
 
 		};
 		transferPanel = new JPanel(new BorderLayout());
-		
+
 		//Setea parametros de la clase
 		this.setLayout(new BorderLayout());
 		this.hide.addActionListener(this);
 		this.hide.setToolTipText("Morstrar / Ocultar");
 		this.setTransferPanelVisible(false);
-		
+
 		//Crea el panel inferior
 		transferPanel.add(hide , BorderLayout.NORTH);
 		transferPanel.add(addPanel, BorderLayout.SOUTH);
@@ -139,15 +139,15 @@ public class AlbumContentPanel extends JPanel implements ActionListener{
 		validateIndex();
 		updateCounters();
 		screen.validateButtons();
-		
+
 		if(list.isEmpty()){
 			screen.showMedia(null);
 		}
 		//Muestra el elemento correspondiente
 		else{
 			screen.showMedia(list.get(index));
-		}	
-		
+		}
+
 	}
 
 	/**
@@ -205,8 +205,8 @@ public class AlbumContentPanel extends JPanel implements ActionListener{
 		DataController.getInstance().copyToAlbum(album, li);
 		updateUIData();
 		screen.validateButtons();
-	}	
-	
+	}
+
 	/**
 	 * Elimina el objeto actual de la librería
 	 */
@@ -216,7 +216,7 @@ public class AlbumContentPanel extends JPanel implements ActionListener{
 		updateUIData();
 		screen.validateButtons();
 	}
-	
+
 	/**
 	 * Retorna la cantidad de items del album
 	 * @return cantidad de items del album
@@ -233,12 +233,10 @@ public class AlbumContentPanel extends JPanel implements ActionListener{
 		showTransferPanel = b;
 		addPanel.setVisible(b);
 	}
-	
+		
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		setTransferPanelVisible(!showTransferPanel);		
+		setTransferPanelVisible(!showTransferPanel);
 	}
-	
+
 }
-
-

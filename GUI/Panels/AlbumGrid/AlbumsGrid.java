@@ -5,8 +5,8 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 
 import javax.swing.JButton;
@@ -25,7 +25,7 @@ import net.iharder.dnd.FileDrop;
  * @author David Giordana
  *
  */
-public class AlbumsGrid extends JPanel implements FileDrop.Listener , ActionListener , MouseListener{
+public class AlbumsGrid extends JPanel implements FileDrop.Listener , ActionListener{
 
 	private static final long serialVersionUID = 9221855484611127388L;
 
@@ -74,11 +74,6 @@ public class AlbumsGrid extends JPanel implements FileDrop.Listener , ActionList
 		this.grid = new JPanel();
 		this.scroll = new JScrollPane(grid);
 
-		//Agrega los listeners
-		this.add.addActionListener(this);
-		this.grid.addMouseListener(this);
-		new FileDrop(this.grid , this);
-
 		//Configuraciones de apariencia
 		this.grid.setLayout(new WrapLayout(FlowLayout.CENTER , GAP , GAP));
 		this.scroll.setBorder(null);
@@ -92,6 +87,18 @@ public class AlbumsGrid extends JPanel implements FileDrop.Listener , ActionList
 		this.setLayout(new BorderLayout());
 		this.add(scroll , BorderLayout.CENTER);
 		this.add(add , BorderLayout.SOUTH);
+		
+		//Agrega los listeners
+		this.add.addActionListener(this);
+		new FileDrop(this.grid , this);
+		this.addMouseListener(new MouseAdapter(){
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				setSelected(null);
+			}
+			
+		});
 	}
 
 	/**
@@ -165,23 +172,6 @@ public class AlbumsGrid extends JPanel implements FileDrop.Listener , ActionList
 	public void actionPerformed(ActionEvent e) {
 		dc.createAlbumDialog();
 	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		this.setSelected(null);
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {}
-
-	@Override
-	public void mouseExited(MouseEvent e) {}
 
 	@Override
 	public void filesDropped(File[] arg0) {

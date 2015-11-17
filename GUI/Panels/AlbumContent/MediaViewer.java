@@ -6,20 +6,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
 
 import javax.swing.JButton;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
 
-import ExtraClass.GUI.ScrollableList;
-import HexalPhotoAlbum.Data.DataController;
 import HexalPhotoAlbum.Data.LibraryItem;
+import HexalPhotoAlbum.GUI.OptionsClass;
 import HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaPanels.AddPanel;
 import HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaPanels.PhotoPanel;
 import HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaPanels.VideoPanel;
@@ -31,7 +23,7 @@ import HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaPanels.VideoPanel;
  * @author David Giordana
  *
  */
-public class MediaViewer extends JPanel implements ActionListener , MouseListener{
+public class MediaViewer extends JPanel implements ActionListener{
 
 	private static final long serialVersionUID = -4248443481445815428L;
 
@@ -39,25 +31,37 @@ public class MediaViewer extends JPanel implements ActionListener , MouseListene
 	private static final String IMAGE = "image";
 	private static final String VIDEO = "video";
 	private static final String NONE = "Node";
+	
+	//Indices para menu contextual
+	public static final int[] PHOTO_CONTEXTUAL_MENU = {
+			OptionsClass.REMOVE_FROM_ALBUM,
+			OptionsClass.DELETE_PHOTO,
+			-1,
+			OptionsClass.CREATE_ALBUM,
+			OptionsClass.TRANSFER_TO_ALBUM,
+			-1,
+			OptionsClass.ROTATE_LEFT,
+			OptionsClass.ROTATE_RIGHT
+	};
+	public static final int[] VIDEO_CONTEXTUAL_MENU = {
+			OptionsClass.REMOVE_FROM_ALBUM,
+			OptionsClass.DELETE_PHOTO,
+			-1,
+			OptionsClass.CREATE_ALBUM,
+			OptionsClass.TRANSFER_TO_ALBUM
+	};
+	public static final int[] ADD_CONTEXTUAL_MENU = {
+			
+	};
 
 	//Paneles para mostrar contenido
 	private PhotoPanel image;
 	private VideoPanel video;
 	private AddPanel none;
 
-	//Controlador de datos
-	private DataController dc;
-
 	//Botones adelantar, retroceder y panel central
 	private AdvanceButton back , next;
 	private JPanel central;
-
-	//Menu contextual
-	private JPopupMenu menu;
-	private JMenuItem remove;
-	private JMenuItem delete;
-	private JMenuItem createAlbum;
-	private JMenuItem transferToAlbum;
 
 	//Indica el tipo del item actual
 	private int type;
@@ -84,7 +88,6 @@ public class MediaViewer extends JPanel implements ActionListener , MouseListene
 	 */
 	private MediaViewer(){
 		//instancia los componentes de la clase
-		dc = DataController.getInstance();
 		image = PhotoPanel.getInstance();
 		video = VideoPanel.getInstance();
 		none = new AddPanel();
@@ -93,7 +96,6 @@ public class MediaViewer extends JPanel implements ActionListener , MouseListene
 		next = new AdvanceButton();
 		cl = new CardLayout();
 		type = -1;
-		createContextualMenu();
 
 		//Setea los parametros de los componentes
 		this.setLayout(new BorderLayout());
@@ -101,8 +103,6 @@ public class MediaViewer extends JPanel implements ActionListener , MouseListene
 		back.setToolTipText("Atras");
 		next.addActionListener(this);
 		next.setToolTipText("Siguiente");
-		image.addMouseListener(this);
-		video.addMouseListener(this);
 
 		//agrega los componentes al panel central
 		this.central.setLayout(cl);
@@ -117,107 +117,9 @@ public class MediaViewer extends JPanel implements ActionListener , MouseListene
 	}
 
 	/**
-	 * Crea el menu contextual de la imagen
-	 */
-	private void createContextualMenu(){
-		menu = new JPopupMenu("Opciones");
-
-		//Opcion quitar del album
-		remove = new JMenuItem("Quitar del album");
-		remove.addActionListener(this);
-		menu.add(remove);
-
-		//Opcion eliminar elemento
-		delete = new JMenuItem("Eliminar Fotografía");
-		delete.addActionListener(this);
-		menu.add(delete);
-
-		//Crea un album
-		createAlbum = new JMenuItem("Crear album");
-		createAlbum.addActionListener(this);
-		menu.add(createAlbum);
-
-		//Transfiere contenido a album
-		transferToAlbum = new JMenuItem("Transferir Fotografia a album");
-		transferToAlbum.addActionListener(this);
-		menu.add(transferToAlbum);
-	}
-
-	/**
 	 * ---- EXTRA CLASS
 	 */
-
-	/**
-	 * Panel para seleccionar el destino de las transferencais
-	 *
-	 * @author David Giordana
-	 *
-	 */
-	private class AlbumsPanel extends JPanel implements ActionListener{
-
-		private static final long serialVersionUID = -4543011701247328288L;
-
-		//Lista de albumes
-		private ScrollableList albums;
-
-		//Voton para crear albumes
-		private JButton createAlbum;
-
-		//Controlador de datos
-		private DataController dc;
-
-		/**
-		 * Constructor de la clase
-		 */
-		public AlbumsPanel(){
-			//Instancia los componentes
-			albums = new ScrollableList();
-			createAlbum = new JButton("Crear Album");
-			dc = DataController.getInstance();
-
-			//Setea los componentes
-			this.createAlbum.addActionListener(this);
-			this.setLayout(new BorderLayout());
-			fillList();
-
-			//Agrega los componentes al panel
-			this.add(albums, BorderLayout.CENTER);
-			this.add(createAlbum , BorderLayout.SOUTH);
-		}
-
-		/**
-		 * rellena la lista de albumes
-		 */
-		private void fillList(){
-			albums.getModel().addElement("Fotos Desordenadas");
-			ArrayList<String> list = dc.getAlbumsList();
-			for(String str : list){
-				albums.getModel().addElement(str);
-			}
-			albums.getList().setSelectedIndex(0);
-		}
-
-		/**
-		 * Retorna el album seleccionado en la lista
-		 * @return Album seleccionado
-		 */
-		public String getAlbum(){
-			return albums.getList().getSelectedIndex() == 0 ? null : albums.getList().getSelectedValue();
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			if(e.getSource().equals(createAlbum)){
-				int cant = dc.getAlbumsList().size();
-				boolean b = dc.createAlbumDialog();
-				if(b && cant != dc.getAlbumsList().size()){
-					albums.getModel().addElement(dc.getAlbumsList().get(cant));
-				}
-			}
-		}
-
-	}
-
+	
 	/**
 	 * Clase que extiende de JButton usada para no tener que setear varias veces los botones
 	 *
@@ -253,7 +155,6 @@ public class MediaViewer extends JPanel implements ActionListener , MouseListene
 		}
 
 	}
-
 
 	/**
 	 * ---- CLASS METHODS
@@ -301,73 +202,6 @@ public class MediaViewer extends JPanel implements ActionListener , MouseListene
 	}
 
 	/**
-	 * ---- CONTEXTUAL MENU METHODS
-	 */
-
-	/**
-	 * LLamado a la hora de remover item de album
-	 */
-	private void removeFromAlbum(){
-		int selection = JOptionPane.showOptionDialog(
-				null, 
-				"¿Está seguro que quiere quitar el archivo del album?" , 
-				"Quitar archivo", 
-				JOptionPane.YES_NO_OPTION,
-				JOptionPane.PLAIN_MESSAGE, 
-				null ,
-				new String[] {"Si" , "No"}, 
-				"No");
-		if(selection == JOptionPane.OK_OPTION)
-			AlbumContentPanel.getInstance().transferItem(null);
-	}
-
-	/**
-	 * Elimina archivo de kubrería
-	 */
-	private void deleteItem(){
-		int selection = JOptionPane.showOptionDialog(
-				null, 
-				"¿Está seguro que quiere eliminar el archivo?" , 
-				"Eliminar archivo", 
-				JOptionPane.YES_NO_OPTION,
-				JOptionPane.PLAIN_MESSAGE, 
-				null ,
-				new String[] {"Si" , "No"}, 
-				"No");
-		if(selection == JOptionPane.OK_OPTION)
-			AlbumContentPanel.getInstance().deleteItem();
-	}
-
-	/**
-	 * Crea un album
-	 */
-	private void createAlbum(){
-		dc.createAlbumDialog();
-	}
-
-	/**
-	 * Transfiere el elemento actual a otro album
-	 */
-	private void transferDataToAlbum(){
-		AlbumsPanel albumPanel = new AlbumsPanel();
-		String name;
-		int selection = JOptionPane.showOptionDialog(
-				null,
-				albumPanel, 
-				"Seleccione el album", 
-				JOptionPane.YES_NO_OPTION , 
-				JOptionPane.PLAIN_MESSAGE ,
-				null ,
-				new String[] {"Transferir" , "Cancelar"} ,
-				"Transferir"
-				);
-		if(selection != JOptionPane.OK_OPTION)
-			return;
-		name = albumPanel.getAlbum();
-		AlbumContentPanel.getInstance().transferItem(name);
-	}
-
-	/**
 	 * ---- INTERFACE METHODS
 	 */
 
@@ -381,42 +215,7 @@ public class MediaViewer extends JPanel implements ActionListener , MouseListene
 			AlbumContentPanel.getInstance().advance(1);
 			validateButtons();
 		}
-		else if(e.getSource().equals(remove)){
-			removeFromAlbum();
-		}
-		else if(e.getSource().equals(delete)){
-			deleteItem();
-		}
-		else if(e.getSource().equals(createAlbum)){
-			createAlbum();
-		}
-		else if(e.getSource().equals(transferToAlbum)){
-			transferDataToAlbum();
-		}
 	}
-
-
-	@Override
-	public void mouseClicked(MouseEvent e) {}
-
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		if((e.getSource().equals(image) || e.getSource().equals(video)) && SwingUtilities.isRightMouseButton(e)){
-			menu.show(e.getComponent(), e.getX(), e.getY());
-		}
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {}
-
-
-	@Override
-	public void mouseEntered(MouseEvent e) {}
-
-
-	@Override
-	public void mouseExited(MouseEvent e) {}
 
 }
 

@@ -3,14 +3,20 @@ package HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaPanels;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import ExtraClass.ImageResizer;
+import HexalPhotoAlbum.GUI.OptionsClass;
 import HexalPhotoAlbum.GUI.Images.ImageGUILoader;
 import HexalPhotoAlbum.GUI.Panels.AlbumContent.AlbumContentPanel;
+import HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaViewer;
 import net.iharder.dnd.FileDrop;
 
 /**
@@ -30,10 +36,25 @@ public class AddPanel extends JPanel implements FileDrop.Listener{
 	 * Constructor de la clase
 	 */
 	public AddPanel(){
+		//Instancia los componentes
 		super();
 		image = ImageGUILoader.getImage("addDND.png");
-
+		
+		//Agrega los listeners
 		new FileDrop(this , this);
+		MouseListener ml = new MouseAdapter(){
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(SwingUtilities.isRightMouseButton(e)){
+					OptionsClass.getInstance().getMenu(MediaViewer.ADD_CONTEXTUAL_MENU).show(e.getComponent(), e.getX(), e.getY());
+				}
+			}
+
+		};
+		this.addMouseListener(ml);
+		
+		//Setea los componentes de la clase
 		this.setBackground(Color.decode("#898C90"));
 	}
 

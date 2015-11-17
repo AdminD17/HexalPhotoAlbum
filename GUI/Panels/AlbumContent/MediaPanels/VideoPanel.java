@@ -6,15 +6,21 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import ExtraClass.OSDirectories;
 import HexalPhotoAlbum.Data.LibraryItem;
+import HexalPhotoAlbum.GUI.OptionsClass;
 import HexalPhotoAlbum.GUI.Images.ImageGUILoader;
+import HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaViewer;
 
 /**
  * Panel para mostrar videos
@@ -65,8 +71,6 @@ public class VideoPanel extends JPanel implements ActionListener{
 		this.setLayout(new BorderLayout());
 		play.setBorder(null);
 		play.setToolTipText("Reproducir");
-		
-		play.addActionListener(this);
 		lab.setText("En la actual versión la aplicacíon no tiene soporte nativo para videos, esta función será incorporada en futuras versiones");
 		
 		//Crea el panel para el boton reproducir
@@ -81,6 +85,20 @@ public class VideoPanel extends JPanel implements ActionListener{
 		gbc.fill= GridBagConstraints.NONE;
 		panel.add(play , gbc);
 		panel.setBackground(Color.decode("#4A4A4A"));
+		
+		//Agrega los listeners
+		play.addActionListener(this);
+		MouseListener ml = new MouseAdapter(){
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(SwingUtilities.isRightMouseButton(e)){
+					OptionsClass.getInstance().getMenu(MediaViewer.VIDEO_CONTEXTUAL_MENU).show(e.getComponent(), e.getX(), e.getY());
+				}
+			}
+
+		};
+		this.addMouseListener(ml);
 
 		//Agrega los componentes al panel
 		this.add(panel, BorderLayout.CENTER);

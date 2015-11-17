@@ -5,14 +5,21 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import ExtraClass.ImageResizer;
 import HexalPhotoAlbum.Data.LibraryItem;
+import HexalPhotoAlbum.GUI.OptionsClass;
+import HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaViewer;
+import javaxt.io.Image;
 
 /**
  * Panel donde se mostrataran imagenes 
@@ -29,7 +36,10 @@ public class PhotoPanel extends JPanel implements ComponentListener{
 
 	//Imagen a mostrar
 	private ImageIcon image;
-	
+
+	//Item de libraría mostrado en pantalla
+	private LibraryItem item;
+
 	//contiene la instancia de la clase
 	private static PhotoPanel ins;
 
@@ -54,19 +64,33 @@ public class PhotoPanel extends JPanel implements ComponentListener{
 		//Setea los parametros del panel
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setVerticalAlignment(SwingConstants.CENTER);
-		this.addComponentListener(this);
 		this.setBackground(Color.decode("#4A4A4A"));
+
+		//Agrega los listeners
+		this.addComponentListener(this);
+		MouseListener ml = new MouseAdapter(){
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(SwingUtilities.isRightMouseButton(e)){
+					OptionsClass.getInstance().getMenu(MediaViewer.PHOTO_CONTEXTUAL_MENU).show(e.getComponent(), e.getX(), e.getY());
+				}
+			}
+
+		};
+		this.addMouseListener(ml);
 
 		//Agrega los componentes al panel
 		this.setLayout(new BorderLayout());
 		this.add(label , BorderLayout.CENTER);
 	}
-		
+
 	/**
 	 * Setea el item a mostrar
 	 * @param item Item a mostrar
 	 */
 	public void setItem(LibraryItem item){
+		this.item = item;
 		this.image = item == null ? null : new ImageIcon(item.getAbsoluteFilePath());
 	}
 
@@ -104,9 +128,25 @@ public class PhotoPanel extends JPanel implements ComponentListener{
 			h = panelSize.height;
 			w = (h * imageSize.width) / imageSize.height;
 		}
-		
+
 		//Redimensiona y retorna la imagen
 		return ImageResizer.resize(image, w, h);		
+	}
+
+	/**
+	 * Rota la imagen actual 
+	 * @param direction numero positivo para rotar a la derecha, numero negativo para rotar a la izquierda
+	 */
+	public void rotateImege(int direction){
+		Image image = new Image(item.getAbsoluteFilePath());
+		if(direction < 0){
+			image.rotate(-90); 
+		}
+		else{
+			image.rotate(90); 
+		}
+		image.saveAs(item.getAbsoluteFilePath());
+		showMedia();		
 	}
 
 	@Override

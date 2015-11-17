@@ -4,15 +4,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
@@ -20,8 +17,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
-import HexalPhotoAlbum.Data.DataController;
 import HexalPhotoAlbum.Data.ImportWorker;
+import HexalPhotoAlbum.GUI.OptionsClass;
 import HexalPhotoAlbum.GUI.Images.ImageGUILoader;
 import HexalPhotoAlbum.GUI.Panels.AlbumsPanel;
 import net.iharder.dnd.FileDrop;
@@ -32,7 +29,7 @@ import net.iharder.dnd.FileDrop;
  * @author David Giordana
  *
  */
-public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListener , ActionListener{
+public class AlbumIcon extends JPanel implements FileDrop.Listener{
 
 	private static final long serialVersionUID = -2460402491567579008L;
 
@@ -68,10 +65,8 @@ public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListen
 	private LineBorder selectedBorder;
 	private LineBorder unselectedBorder;
 
-	//Menu contextual del icono
-	private JPopupMenu menu;
-	private JMenuItem deleteAlbum;
-	private JMenuItem closeAlbum;
+	//Controlador de opciones
+	private OptionsClass oc;
 
 	//COntiene una instancia de la grilla de albumes
 	private AlbumsGrid ag;
@@ -85,7 +80,7 @@ public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListen
 	 * @param name nombre del album
 	 * @param iconType indice del icono
 	 */
-	public AlbumIcon(String name , int iconType){
+	public AlbumIcon(String name , int iconType){		
 		//Instancia los componentes de la clase
 		this.ag = AlbumsGrid.getInstance();
 		this.type = iconType;
@@ -113,7 +108,7 @@ public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListen
 		this.textField = new JTextField();
 		this.selectedBorder = new LineBorder(Color.BLACK , 2 , true);
 		this.unselectedBorder = new LineBorder(new Color(0,0,0,0) , 2);
-		this.createMenuPopUp();
+		this.oc = OptionsClass.getInstance();
 
 		//Setea los componentes de la clase
 		this.label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -148,9 +143,7 @@ public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListen
 		this.add(textField , gbc);
 
 		//agrega los listeners del panel
-		this.addMouseListener(this);
-		this.label.addMouseListener(this);
-		this.textField.addMouseListener(this);
+		this.addMouseControl();
 		new FileDrop(this , this);
 	}
 
@@ -179,14 +172,18 @@ public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListen
 	 * @param newName nuevo nombre a setear
 	 */
 	public void setAlbumName(String name){
-		this.name = name;
-		if(name == null){
-			name = "Fotos Desordenadas";
+		//Caso fotos desordenadas
+		if(type == DISORDERED_ICON){
+			this.name = null;
+			return;
 		}
+
+		//Caso album 
 		String text = name;
 		if(name.length() > COLS){
 			text = name.substring(0, COLS - 3) + "...";
 		}
+		this.name = text;
 		this.textField.setText(text);
 	}
 
@@ -221,91 +218,55 @@ public class AlbumIcon extends JPanel implements FileDrop.Listener , MouseListen
 
 	/**
 	 * Crea el menu contextual del icono
+	 * @return Menu contextual
 	 */
-	private void createMenuPopUp(){
-		menu = new JPopupMenu("Menu contextual");
-
-		//Boton eliminar album con contenido
-		if(name != null){
-			deleteAlbum = new JMenuItem("Eliminar album");
-			deleteAlbum.addActionListener(this);
-			menu.add(deleteAlbum);
+	private JPopupMenu createMenuPopUp(){
+		//Crea el menu
+		int[] arr = null;
+		if(this.getType() == DISORDERED_ICON){
+			arr = new int[]{
+					OptionsClass.CREATE_ALBUM
+			};
 		}
-		//boton quitar album (Elimina el album pero el contenido no se pierde)
-		if(name != null){
-			closeAlbum = new JMenuItem("Quitar album");
-			closeAlbum.addActionListener(this);
-			menu.add(closeAlbum);
+		else if (this.getType() == ALBUM_ICON){
+			arr = new int[]{
+					OptionsClass.CREATE_ALBUM,
+					-1,
+					OptionsClass.DELETE_ALBUM,
+					OptionsClass.CLOSE_ALBUM
+			};
 		}
+		return oc.getMenu(arr);
 	}
 
 	/**
-	 * ---- IMPLEMENTED INTERFACE METHODS
+	 * Agrega los controles del mouse al icono
 	 */
+	private void addMouseControl(){
+		AlbumIcon albumIcon = this;
+		MouseListener ml = new MouseAdapter(){
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-		if (SwingUtilities.isRightMouseButton(e)) {
-			ag.setSelected(this);
-			menu.show(e.getComponent(), e.getX(), e.getY());
-		}
-		else if(e.getClickCount() == 1){
-			ag.setSelected(this);
-		}
-		else if(e.getClickCount() > 1){
-			AlbumsPanel.getInstance().showAlbum(getAlbumName());
-		}
+			@Override
+			public void mousePressed(MouseEvent e) {
+				ag.setSelected(albumIcon);
+
+				if(SwingUtilities.isRightMouseButton(e)){
+					createMenuPopUp().show(e.getComponent(), e.getX(), e.getY());
+				}
+				else if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() > 1){
+					AlbumsPanel.getInstance().showAlbum(getAlbumName());
+				}
+			}
+
+		};
+		this.addMouseListener(ml);
+		this.label.addMouseListener(ml);
+		this.textField.addMouseListener(ml);
 	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {}
-
-	@Override
-	public void mouseExited(MouseEvent e) {}
 
 	@Override
 	public void filesDropped(File[] arg0) {
 		ImportWorker.getWorker(arg0, name).start();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if(e.getSource().equals(deleteAlbum)){
-			int selection = JOptionPane.showOptionDialog(
-					null, 
-					"¿Está seguro que quiere eliminar el album?" , 
-					"Eliminar album", 
-					JOptionPane.YES_NO_OPTION,
-					JOptionPane.PLAIN_MESSAGE, 
-					null ,
-					new String[] {"Si" , "No"}, 
-					"No");
-			if(selection == JOptionPane.OK_OPTION){
-				DataController.getInstance().removeAlbum(name);
-				ag.removeAlbum(name);
-			}
-		}
-		if(e.getSource().equals(closeAlbum)){
-			int selection = JOptionPane.showOptionDialog(
-					null, 
-					"¿Está seguro que quiere cerrar el album?" , 
-					"Cerrar album", 
-					JOptionPane.YES_NO_OPTION,
-					JOptionPane.PLAIN_MESSAGE, 
-					null ,
-					new String[] {"Si" , "No"}, 
-					"No");
-			if(selection == JOptionPane.OK_OPTION){
-				DataController.getInstance().closeAlbum(name);
-				ag.removeAlbum(name);
-			}
-		}
 	}
 
 }
