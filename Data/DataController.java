@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -18,6 +19,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import ExtraClass.GUI.JTextFieldHint;
 import HexalPhotoAlbum.GUI.Panels.AlbumsPanel;
+import HexalPhotoAlbum.GUI.Panels.AlbumContent.AlbumContentPanel;
 
 /**
  * Contiene la lista de estructuras PhotoData
@@ -346,19 +348,16 @@ public class DataController {
 	/**
 	 * Agrega nuevos items a la librería
 	 * @param album Nombre del album
-	 *
+	 */
 	public void addFilesToLibraryDialog(String album){
 		JFileChooser jfc = new JFileChooser();
 		jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		jfc.setMultiSelectionEnabled(true);
 		int selected = jfc.showOpenDialog(null);
 		if(selected == JFileChooser.APPROVE_OPTION){
-			File[] list = jfc.getSelectedFiles();
-			for(File f : list){
-				this.addPhoto(f, album, true*askKeep()*);
-			}
+			AlbumContentPanel.getInstance().importDnDData(jfc.getSelectedFiles());	
 		}
-	}*/
+	}
 
 	boolean temp789;
 
