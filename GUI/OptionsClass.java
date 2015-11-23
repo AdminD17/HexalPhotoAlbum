@@ -17,7 +17,9 @@ import javax.swing.SwingUtilities;
 
 import ExtraClass.GUI.ScrollableList;
 import HexalPhotoAlbum.Data.DataController;
+import HexalPhotoAlbum.Data.LibraryItem;
 import HexalPhotoAlbum.GUI.Panels.AlbumContent.AlbumContentPanel;
+import HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaViewer;
 import HexalPhotoAlbum.GUI.Panels.AlbumContent.MediaPanels.PhotoPanel;
 import HexalPhotoAlbum.GUI.Panels.AlbumGrid.AlbumsGrid;
 
@@ -57,6 +59,9 @@ public class OptionsClass {
 	//Rotar derecha
 	public static final int ROTATE_RIGHT = 7;
 
+	//copia de archivo a locacion especifica
+	public static final int COPY_FILE_TO_LOCATION = 8;
+
 	/**
 	 * ---- ATTRIBUTES
 	 */
@@ -95,17 +100,19 @@ public class OptionsClass {
 		this.actionListenerList.add(createTransferToAlbumListener());
 		this.actionListenerList.add(createRotateLListener());
 		this.actionListenerList.add(createRotateRListener());
-		
+		this.actionListenerList.add(createCopyFileToLocation());
+
 		//Crea los items de menu 
 		this.menuItemList = new ArrayList<JMenuItem>();
 		this.menuItemList.add(createMenuItem("Crear album", CREATE_ALBUM));
 		this.menuItemList.add(createMenuItem("Cerrar album", CLOSE_ALBUM));
 		this.menuItemList.add(createMenuItem("Eliminar album", DELETE_ALBUM));
-		this.menuItemList.add(createMenuItem("Eliminar del album", REMOVE_FROM_ALBUM));
+		this.menuItemList.add(createMenuItem("Quitar del album", REMOVE_FROM_ALBUM));
 		this.menuItemList.add(createMenuItem("Eliminar archivo", DELETE_PHOTO));
 		this.menuItemList.add(createMenuItem("Mover archivo a album", TRANSFER_TO_ALBUM));
 		this.menuItemList.add(createMenuItem("Rotar a la izquierda", ROTATE_LEFT));
 		this.menuItemList.add(createMenuItem("Rotar a la deracha", ROTATE_RIGHT));
+		this.menuItemList.add(createMenuItem("Copiar archivo", COPY_FILE_TO_LOCATION));
 
 	}
 
@@ -189,7 +196,7 @@ public class OptionsClass {
 			disableMenuOptions(i);
 		}
 	}
-	
+
 	/**
 	 * Crea un item de menu
 	 * @param title Titulo del item
@@ -201,7 +208,7 @@ public class OptionsClass {
 		ret.addActionListener(listener);
 		return ret;
 	}
-	
+
 	/**
 	 * Crea un item de menu
 	 * @param title Titulo del item
@@ -211,7 +218,7 @@ public class OptionsClass {
 	private JMenuItem createMenuItem(String title, int index){
 		return createMenuItem(title, getActionListener(index));
 	}
-	
+
 	/**
 	 * Retorna un item de menu
 	 * @param index Indice del item
@@ -220,7 +227,7 @@ public class OptionsClass {
 	public JMenuItem getMenuItem(int index){
 		return this.menuItemList.get(index);
 	}
-		
+
 	/**
 	 * ---- OBJECTS CONSTRUCTOR
 	 */
@@ -400,6 +407,29 @@ public class OptionsClass {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				PhotoPanel.getInstance().rotateImege(1);
+			}
+
+		};
+	}
+
+	/**
+	 * Crea el listener par copiar archivo a una locacion especifica
+	 * @return listener par copiar archivo a una locacion especifica
+	 */
+	private ActionListener createCopyFileToLocation(){
+		return new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//Obtiene el item de librería
+				LibraryItem li = MediaViewer.getInstance().getActualLibraryItem();
+				if(li == null){
+					System.err.println("Archivo nulo no puede ser copiado");
+					return;
+				}
+
+				//Copia el archivo
+				DataController.getInstance().copyFileToExtern(li);
 			}
 
 		};

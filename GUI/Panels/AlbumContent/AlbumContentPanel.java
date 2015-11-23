@@ -115,6 +115,7 @@ public class AlbumContentPanel extends JPanel implements ActionListener{
 		list = DataController.getInstance().getAlbumContent(s);
 		index = -1;
 		updateUIData();
+		setTransferPanelVisible(false);
 	}
 
 	/**

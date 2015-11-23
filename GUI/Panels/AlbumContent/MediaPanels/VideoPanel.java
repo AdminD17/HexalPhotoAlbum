@@ -112,12 +112,19 @@ public class VideoPanel extends JPanel implements ActionListener{
 	public void showMedia(LibraryItem item) {
 		li = item;
 	}
+	
+	/**
+	 * Retorna el item de libraría actual
+	 * @return Item de libraría actual
+	 */
+	public LibraryItem getLibraryItem(){
+		return li;
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String com = "";
-		/*if(os.isWindows()){}
-		else*/ if(os.isMac()){
+		if(os.isMac()){
 			com = "open ";
 		}
 		else if(os.isUnix()){

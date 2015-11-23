@@ -31,7 +31,7 @@ public class MediaViewer extends JPanel implements ActionListener{
 	private static final String IMAGE = "image";
 	private static final String VIDEO = "video";
 	private static final String NONE = "Node";
-	
+
 	//Indices para menu contextual
 	public static final int[] PHOTO_CONTEXTUAL_MENU = {
 			OptionsClass.REMOVE_FROM_ALBUM,
@@ -39,6 +39,7 @@ public class MediaViewer extends JPanel implements ActionListener{
 			-1,
 			OptionsClass.CREATE_ALBUM,
 			OptionsClass.TRANSFER_TO_ALBUM,
+			OptionsClass.COPY_FILE_TO_LOCATION,
 			-1,
 			OptionsClass.ROTATE_LEFT,
 			OptionsClass.ROTATE_RIGHT
@@ -48,10 +49,11 @@ public class MediaViewer extends JPanel implements ActionListener{
 			OptionsClass.DELETE_PHOTO,
 			-1,
 			OptionsClass.CREATE_ALBUM,
-			OptionsClass.TRANSFER_TO_ALBUM
+			OptionsClass.TRANSFER_TO_ALBUM,
+			OptionsClass.COPY_FILE_TO_LOCATION
 	};
 	public static final int[] ADD_CONTEXTUAL_MENU = {
-			
+
 	};
 
 	//Paneles para mostrar contenido
@@ -62,9 +64,6 @@ public class MediaViewer extends JPanel implements ActionListener{
 	//Botones adelantar, retroceder y panel central
 	private AdvanceButton back , next;
 	private JPanel central;
-
-	//Indica el tipo del item actual
-	private int type;
 
 	//layout del panel
 	private CardLayout cl;
@@ -95,7 +94,6 @@ public class MediaViewer extends JPanel implements ActionListener{
 		back = new AdvanceButton();
 		next = new AdvanceButton();
 		cl = new CardLayout();
-		type = -1;
 
 		//Setea los parametros de los componentes
 		this.setLayout(new BorderLayout());
@@ -119,7 +117,7 @@ public class MediaViewer extends JPanel implements ActionListener{
 	/**
 	 * ---- EXTRA CLASS
 	 */
-	
+
 	/**
 	 * Clase que extiende de JButton usada para no tener que setear varias veces los botones
 	 *
@@ -166,31 +164,20 @@ public class MediaViewer extends JPanel implements ActionListener{
 	 */
 	public void showMedia(LibraryItem item){
 		if(item == null){
-			type = -1;
 			OptionsPanel.getInstance().setCounters(0 , 0);
 			cl.show(this.central , NONE);
 		}
 		else if(item.getDataType() == LibraryItem.IMAGE_TYPE){
-			if(type != LibraryItem.IMAGE_TYPE){
-				type = item.getDataType();
-				image.setItem(item);
-				image.showMedia();
-				cl.show(this.central , IMAGE);
-			}
-			else{
-				image.setItem(item);
-				image.showMedia();
-			}
+			image.setItem(item);
+			image.showMedia();
+			cl.show(this.central , IMAGE);
+
 		}
 		else if(item.getDataType() == LibraryItem.VIDEO_TYPE){
-			if(type != LibraryItem.VIDEO_TYPE){
-				type = item.getDataType();
-				cl.show(this.central, VIDEO);
-				video.showMedia(item);
-			}
-			else
-				video.showMedia(item);
+			cl.show(this.central, VIDEO);
+			video.showMedia(item);
 		}
+
 	}
 
 	/**
@@ -199,6 +186,38 @@ public class MediaViewer extends JPanel implements ActionListener{
 	public void validateButtons(){
 		back.setEnabled(AlbumContentPanel.getInstance().hasBack());
 		next.setEnabled(AlbumContentPanel.getInstance().hasNext());
+	}
+
+	/**
+	 * Retorna el item de librería actual
+	 * @return Item de libraría actual
+	 */
+	public LibraryItem getActualLibraryItem(){
+		JPanel temp = getActualPanel();
+		if(image.equals(temp)){
+			return image.getLibraryItem();
+		}
+		else if(video.equals(temp)){
+			return video.getLibraryItem();
+		}
+		return null;
+	}
+
+	/**
+	 * Retorna el panel actual
+	 * @return panel actual
+	 */
+	private JPanel getActualPanel(){
+		if(none.isVisible()){
+			return none;
+		}
+		else if(image.isVisible()){
+			return image;
+		}
+		else if(video.isVisible()){
+			return video;
+		}
+		return null;
 	}
 
 	/**

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -425,6 +426,46 @@ public class DataController {
 			this.getAlbumsList().add(name);
 		}
 		AlbumsPanel.getInstance().addAlbum(name);
+	}
+
+	String tempS;
+
+	/**
+	 * Copia un item de librería fuera de la librería
+	 * @param li Item de lubrería
+	 */
+	public void copyFileToExtern(LibraryItem li){
+		//Actua en base a la selección
+		tempS = "";
+
+		//Solicita la locacion de destino
+		JFileChooser jfc = new JFileChooser();
+		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		jfc.setMultiSelectionEnabled(true);
+		int selected = jfc.showOpenDialog(null);
+		if(selected != JFileChooser.APPROVE_OPTION){
+			return;
+		}
+		tempS = jfc.getSelectedFile().getAbsolutePath();
+
+		//Copia el archivo
+		Thread thread = new Thread(){
+
+			@Override
+			public void run(){
+				try {
+					FileUtils.copyFileToDirectory(li.getFile(), new File(tempS));
+				} catch (IOException e) {
+					System.err.println(String.format("No se pudo copiar el archivo %s al directorio %s", li.getAbsoluteFilePath() , tempS));
+					e.printStackTrace();
+				}
+			}
+
+		};
+		thread.start();
+		try {
+			thread.join();
+		} catch (InterruptedException e) {}
 	}
 
 }

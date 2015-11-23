@@ -148,6 +148,14 @@ public class PhotoPanel extends JPanel implements ComponentListener{
 		image.saveAs(item.getAbsoluteFilePath());
 		showMedia();		
 	}
+	
+	/**
+	 * Retorna el item de libraría actual
+	 * @return Item de libraría actual
+	 */
+	public LibraryItem getLibraryItem(){
+		return item;
+	}
 
 	@Override
 	public void componentResized(ComponentEvent e) {
